@@ -1,0 +1,214 @@
+{
+    "apiVersion": "apps.openshift.io/v1",
+    "kind": "DeploymentConfig",
+    "metadata": {
+        "creationTimestamp": "2017-04-28T14:49:33Z",
+        "generation": 19,
+        "labels": {
+            "docker-registry": "default"
+        },
+        "name": "docker-registry",
+        "namespace": "default",
+        "resourceVersion": "2027568655",
+        "selfLink": "/apis/apps.openshift.io/v1/namespaces/default/deploymentconfigs/docker-registry",
+        "uid": "e45af973-2c21-11e7-a84f-0ab8769191d3"
+    },
+    "spec": {
+        "replicas": 3,
+        "selector": {
+            "docker-registry": "default"
+        },
+        "strategy": {
+            "activeDeadlineSeconds": 21600,
+            "resources": {},
+            "rollingParams": {
+                "intervalSeconds": 1,
+                "maxSurge": "25%",
+                "maxUnavailable": "25%",
+                "timeoutSeconds": 600,
+                "updatePeriodSeconds": 1
+            },
+            "type": "Rolling"
+        },
+        "template": {
+            "metadata": {
+                "creationTimestamp": null,
+                "labels": {
+                    "docker-registry": "default"
+                }
+            },
+            "spec": {
+                "containers": [
+                    {
+                        "env": [
+                            {
+                                "name": "REGISTRY_HTTP_ADDR",
+                                "value": ":5000"
+                            },
+                            {
+                                "name": "REGISTRY_HTTP_NET",
+                                "value": "tcp"
+                            },
+                            {
+                                "name": "REGISTRY_HTTP_SECRET",
+                                "value": "IGNORED"
+                            },
+                            {
+                                "name": "REGISTRY_MIDDLEWARE_REPOSITORY_OPENSHIFT_ENFORCEQUOTA",
+                                "value": "false"
+                            },
+                            {
+                                "name": "REGISTRY_HTTP_TLS_KEY",
+                                "value": "/etc/secrets/registry.key"
+                            },
+                            {
+                                "name": "REGISTRY_CONFIGURATION_PATH",
+                                "value": "/etc/registry/config.yml"
+                            },
+                            {
+                                "name": "REGISTRY_HTTP_TLS_CERTIFICATE",
+                                "value": "/etc/secrets/registry.crt"
+                            },
+                            {
+                                "name": "REGISTRY_OPENSHIFT_REQUESTS_WRITE_MAXRUNNING",
+                                "value": "256"
+                            },
+                            {
+                                "name": "REGISTRY_OPENSHIFT_REQUESTS_WRITE_MAXWAITINQUEUE",
+                                "value": "2h"
+                            }
+                        ],
+                        "image": "registry.reg-aws.openshift.com:443/openshift3/ose-docker-registry:v3.7.23",
+                        "imagePullPolicy": "IfNotPresent",
+                        "livenessProbe": {
+                            "failureThreshold": 3,
+                            "httpGet": {
+                                "path": "/healthz",
+                                "port": 5000,
+                                "scheme": "HTTPS"
+                            },
+                            "initialDelaySeconds": 10,
+                            "periodSeconds": 10,
+                            "successThreshold": 1,
+                            "timeoutSeconds": 5
+                        },
+                        "name": "registry",
+                        "ports": [
+                            {
+                                "containerPort": 5000,
+                                "protocol": "TCP"
+                            }
+                        ],
+                        "readinessProbe": {
+                            "failureThreshold": 3,
+                            "httpGet": {
+                                "path": "/healthz",
+                                "port": 5000,
+                                "scheme": "HTTPS"
+                            },
+                            "periodSeconds": 10,
+                            "successThreshold": 1,
+                            "timeoutSeconds": 5
+                        },
+                        "resources": {
+                            "requests": {
+                                "cpu": "100m",
+                                "memory": "256Mi"
+                            }
+                        },
+                        "securityContext": {
+                            "privileged": false
+                        },
+                        "terminationMessagePath": "/dev/termination-log",
+                        "terminationMessagePolicy": "File",
+                        "volumeMounts": [
+                            {
+                                "mountPath": "/registry",
+                                "name": "registry-storage"
+                            },
+                            {
+                                "mountPath": "/etc/secrets",
+                                "name": "registry-certificates"
+                            },
+                            {
+                                "mountPath": "/etc/registry",
+                                "name": "docker-config"
+                            }
+                        ]
+                    }
+                ],
+                "dnsPolicy": "ClusterFirst",
+                "nodeSelector": {
+                    "type": "infra"
+                },
+                "restartPolicy": "Always",
+                "schedulerName": "default-scheduler",
+                "securityContext": {},
+                "serviceAccount": "registry",
+                "serviceAccountName": "registry",
+                "terminationGracePeriodSeconds": 30,
+                "volumes": [
+                    {
+                        "emptyDir": {},
+                        "name": "registry-storage"
+                    },
+                    {
+                        "name": "registry-certificates",
+                        "secret": {
+                            "defaultMode": 420,
+                            "secretName": "registry-certificates"
+                        }
+                    },
+                    {
+                        "name": "docker-config",
+                        "secret": {
+                            "defaultMode": 420,
+                            "secretName": "registry-config"
+                        }
+                    }
+                ]
+            }
+        },
+        "test": false,
+        "triggers": [
+            {
+                "type": "ConfigChange"
+            }
+        ]
+    },
+    "status": {
+        "availableReplicas": 3,
+        "conditions": [
+            {
+                "lastTransitionTime": "2018-01-18T15:39:52Z",
+                "lastUpdateTime": "2018-01-18T15:39:54Z",
+                "message": "replication controller \"docker-registry-8\" successfully rolled out",
+                "reason": "NewReplicationControllerAvailable",
+                "status": "True",
+                "type": "Progressing"
+            },
+            {
+                "lastTransitionTime": "2018-02-13T18:19:13Z",
+                "lastUpdateTime": "2018-02-13T18:19:13Z",
+                "message": "Deployment config has minimum availability.",
+                "status": "True",
+                "type": "Available"
+            }
+        ],
+        "details": {
+            "causes": [
+                {
+                    "type": "ConfigChange"
+                }
+            ],
+            "message": "config change"
+        },
+        "latestVersion": 8,
+        "observedGeneration": 19,
+        "readyReplicas": 3,
+        "replicas": 3,
+        "unavailableReplicas": 0,
+        "updatedReplicas": 3
+    }
+}
+
