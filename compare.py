@@ -26,10 +26,12 @@ def getContexts(clusterCSV):
     contexts = config["contexts"]
     out = []
     for context in contexts:
+        name = context["name"]
+        context = context["context"]
         if "cluster" not in context or "namespace" not in context:
             continue
-        cluster = context["context"]["cluster"]
-        namespace = context["context"]["namespace"]
+        cluster = context["cluster"]
+        namespace = context["namespace"]
         if namespace != "default":
             continue
         found = False
@@ -38,7 +40,7 @@ def getContexts(clusterCSV):
                 found = True
                 break
         if found:
-            out.append(context["name"])
+            out.append(name)
     out.sort()
     return out
 
