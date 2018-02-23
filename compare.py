@@ -5,6 +5,7 @@ import jsondiff
 import sys
 import subprocess
 import operator
+import argparse
 from pprint import pprint
 
 resource=""
@@ -13,7 +14,8 @@ name=""
 ignoreEnvVars = []
 ignoreAnnotations = ["deployment.kubernetes.io/revision", "kubectl.kubernetes.io/last-applied-configuration"]
 
-def getContexts():
+def getContexts(clusterCSV):
+    clusters = clusterCSV.split(",")
     completed = subprocess.run(['oc', 'config', 'view', '-o', 'json'],
             stdout=subprocess.PIPE,
     )
@@ -28,9 +30,13 @@ def getContexts():
         namespace = context["context"]["namespace"]
         if namespace != "default":
             continue
-        if "starter" not in cluster and "free" not in cluster:
-            continue
-        out.append(context["name"])
+        found = False
+        for c in clusters:
+            if c in cluster:
+                found = True
+                break
+        if found:
+            out.append(context["name"])
     out.sort()
     return out
 
@@ -48,7 +54,7 @@ def getDefaultsFromTemplate(dc):
             continue
         env = containers["env"]
         for val in env:
-            if val["value"] == "IGNORED":
+            if "value" in val and val["value"] == "IGNORED":
                 ignoreEnvVars.append(val["name"])
 
     global ignoreAnnotations
@@ -80,7 +86,7 @@ def cleanENV(dc, ignoreEnvVars):
 def cleanMeta(dc):
     meta = dc["metadata"]
     for key in [ 'creationTimestamp', 'generation', 'resourceVersion', 'selfLink', 'uid' ]:
-        meta.pop(key)
+        meta.pop(key, None)
     dc["metadata"] = meta
     if "annotations" in dc["metadata"]:
         annotations = dc["metadata"]["annotations"]
@@ -88,31 +94,43 @@ def cleanMeta(dc):
             annotations.pop(ignore, None)
 
 def cleanStatus(dc):
-    dc.pop('status')
+    dc.pop('status', None)
 
-with open(sys.argv[1]) as json_data:
-    template = json.load(json_data)
-    json_data.close()
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("templateFile", help="File To Use As A Template")
+    parser.add_argument("--clusters", help="strings to look for in cluster names (CSV)", default="starter,free")
+    parser.add_argument("--ignore-annotations", help="annotations to ignore (CSV)", default="deployment.kubernetes.io/revision,kubectl.kubernetes.io/last-applied-configuration")
+    args = parser.parse_args()
 
-getDefaultsFromTemplate(template)
-cleanENV(template, ignoreEnvVars)
-cleanMeta(template)
-cleanStatus(template)
+    with open(args.templateFile) as json_data:
+        template = json.load(json_data)
+        json_data.close()
 
-contexts = getContexts()
-for context in contexts:
-    completed = subprocess.run(
-        ['oc', 'get', '-o', 'json', ("--namespace=%s" % namespace), ("--context=%s" % context), resource, name],
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-    )
-    if completed.returncode != 0:
-        print("Error: oc get -o json --namespace=%s --context=%s %s %s:" % (namespace, context, resource, name))
-        print(completed.stderr.decode('utf-8'))
-        sys.exit(1)
-    dc = json.loads(completed.stdout.decode('utf-8'))
-    cleanMeta(dc)
-    cleanENV(dc, ignoreEnvVars)
-    cleanStatus(dc)
-    print("Results for: ", context)
-    pprint(jsondiff.diff(template, dc, syntax='symmetric'))
+    getDefaultsFromTemplate(template)
+    cleanENV(template, ignoreEnvVars)
+    cleanMeta(template)
+    cleanStatus(template)
+
+    contexts = getContexts(args.clusters)
+    for context in contexts:
+        completed = subprocess.run(
+            ['oc', 'get', '-o', 'json', ("--namespace=%s" % namespace), ("--context=%s" % context), resource, name],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
+        if completed.returncode != 0:
+            print("Error: oc get -o json --namespace=%s --context=%s %s %s:" % (namespace, context, resource, name))
+            print(completed.stderr.decode('utf-8'))
+            continue
+        dc = json.loads(completed.stdout.decode('utf-8'))
+        cleanMeta(dc)
+        cleanENV(dc, ignoreEnvVars)
+        cleanStatus(dc)
+        print("Results for: ", context)
+        pprint(jsondiff.diff(template, dc, syntax='symmetric'))
+        print("************************************************************")
+        print("")
+
+if __name__== "__main__":
+  main()

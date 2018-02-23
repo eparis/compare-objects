@@ -1,0 +1,201 @@
+{
+    "apiVersion": "v1",
+    "kind": "DeploymentConfig",
+    "metadata": {
+        "creationTimestamp": "2017-09-26T02:16:40Z",
+        "generation": 6,
+        "labels": {
+            "component": "curator",
+            "logging-infra": "curator",
+            "provider": "openshift"
+        },
+        "name": "logging-curator",
+        "namespace": "logging",
+        "resourceVersion": "965589957",
+        "selfLink": "/oapi/v1/namespaces/logging/deploymentconfigs/logging-curator",
+        "uid": "bb4e9f32-a260-11e7-86ea-0233cba325d9"
+    },
+    "spec": {
+        "replicas": 1,
+        "selector": {
+            "component": "curator",
+            "logging-infra": "curator",
+            "provider": "openshift"
+        },
+        "strategy": {
+            "activeDeadlineSeconds": 21600,
+            "recreateParams": {
+                "timeoutSeconds": 600
+            },
+            "resources": {},
+            "rollingParams": {
+                "intervalSeconds": 1,
+                "maxSurge": "25%",
+                "maxUnavailable": "25%",
+                "timeoutSeconds": 600,
+                "updatePeriodSeconds": 1
+            },
+            "type": "Recreate"
+        },
+        "template": {
+            "metadata": {
+                "creationTimestamp": null,
+                "labels": {
+                    "component": "curator",
+                    "logging-infra": "curator",
+                    "provider": "openshift"
+                },
+                "name": "logging-curator"
+            },
+            "spec": {
+                "containers": [
+                    {
+                        "env": [
+                            {
+                                "name": "K8S_HOST_URL",
+                                "value": "https://kubernetes.default.svc.cluster.local"
+                            },
+                            {
+                                "name": "ES_HOST",
+                                "value": "logging-es"
+                            },
+                            {
+                                "name": "ES_PORT",
+                                "value": "9200"
+                            },
+                            {
+                                "name": "ES_CLIENT_CERT",
+                                "value": "/etc/curator/keys/cert"
+                            },
+                            {
+                                "name": "ES_CLIENT_KEY",
+                                "value": "/etc/curator/keys/key"
+                            },
+                            {
+                                "name": "ES_CA",
+                                "value": "/etc/curator/keys/ca"
+                            },
+                            {
+                                "name": "CURATOR_DEFAULT_DAYS",
+                                "value": "7"
+                            },
+                            {
+                                "name": "CURATOR_RUN_HOUR",
+                                "value": "0"
+                            },
+                            {
+                                "name": "CURATOR_RUN_MINUTE",
+                                "value": "0"
+                            },
+                            {
+                                "name": "CURATOR_RUN_TIMEZONE",
+                                "value": "UTC"
+                            },
+                            {
+                                "name": "CURATOR_SCRIPT_LOG_LEVEL",
+                                "value": "INFO"
+                            },
+                            {
+                                "name": "CURATOR_LOG_LEVEL",
+                                "value": "WARN"
+                            }
+                        ],
+                        "image": "registry.reg-aws.openshift.com:443/openshift3/logging-curator:v3.7.9",
+                        "imagePullPolicy": "IfNotPresent",
+                        "name": "curator",
+                        "resources": {
+                            "limits": {
+                                "memory": "512Mi"
+                            },
+                            "requests": {
+                                "cpu": "25m",
+                                "memory": "512Mi"
+                            }
+                        },
+                        "terminationMessagePath": "/dev/termination-log",
+                        "terminationMessagePolicy": "File",
+                        "volumeMounts": [
+                            {
+                                "mountPath": "/etc/curator/keys",
+                                "name": "certs",
+                                "readOnly": true
+                            },
+                            {
+                                "mountPath": "/etc/curator/settings",
+                                "name": "config",
+                                "readOnly": true
+                            }
+                        ]
+                    }
+                ],
+                "dnsPolicy": "ClusterFirst",
+                "nodeSelector": {
+                    "type": "infra"
+                },
+                "restartPolicy": "Always",
+                "schedulerName": "default-scheduler",
+                "securityContext": {},
+                "serviceAccount": "aggregated-logging-curator",
+                "serviceAccountName": "aggregated-logging-curator",
+                "terminationGracePeriodSeconds": 30,
+                "volumes": [
+                    {
+                        "name": "certs",
+                        "secret": {
+                            "defaultMode": 420,
+                            "secretName": "logging-curator"
+                        }
+                    },
+                    {
+                        "configMap": {
+                            "defaultMode": 420,
+                            "name": "logging-curator"
+                        },
+                        "name": "config"
+                    }
+                ]
+            }
+        },
+        "test": false,
+        "triggers": [
+            {
+                "type": "ConfigChange"
+            }
+        ]
+    },
+    "status": {
+        "availableReplicas": 1,
+        "conditions": [
+            {
+                "lastTransitionTime": "2017-12-14T17:24:42Z",
+                "lastUpdateTime": "2017-12-14T17:24:47Z",
+                "message": "replication controller \"logging-curator-4\" successfully rolled out",
+                "reason": "NewReplicationControllerAvailable",
+                "status": "True",
+                "type": "Progressing"
+            },
+            {
+                "lastTransitionTime": "2018-02-21T20:47:54Z",
+                "lastUpdateTime": "2018-02-21T20:47:54Z",
+                "message": "Deployment config has minimum availability.",
+                "status": "True",
+                "type": "Available"
+            }
+        ],
+        "details": {
+            "causes": [
+                {
+                    "type": "ConfigChange"
+                }
+            ],
+            "message": "config change"
+        },
+        "latestVersion": 4,
+        "observedGeneration": 6,
+        "readyReplicas": 1,
+        "replicas": 1,
+        "unavailableReplicas": 0,
+        "updatedReplicas": 1
+    }
+}
+
