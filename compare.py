@@ -26,6 +26,8 @@ def getContexts(clusterCSV):
     contexts = config["contexts"]
     out = []
     for context in contexts:
+        if "cluster" not in context or "namespace" not in context:
+            continue
         cluster = context["context"]["cluster"]
         namespace = context["context"]["namespace"]
         if namespace != "default":
