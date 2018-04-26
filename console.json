@@ -3,8 +3,8 @@
     "kind": "Deployment",
     "metadata": {
         "annotations": {
-            "deployment.kubernetes.io/revision": "3",
-            "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"extensions/v1beta1\",\"kind\":\"Deployment\",\"metadata\":{\"annotations\":{\"deployment.kubernetes.io/revision\":\"2\"},\"creationTimestamp\":\"2018-02-13T19:04:50Z\",\"generation\":2,\"labels\":{\"app\":\"openshift-web-console\",\"webconsole\":\"true\"},\"name\":\"webconsole\",\"namespace\":\"openshift-web-console\",\"selfLink\":\"/apis/extensions/v1beta1/namespaces/openshift-web-console/deployments/webconsole\",\"uid\":\"c42a4ae7-10f0-11e8-ac61-02ac3a1f9d61\"},\"spec\":{\"progressDeadlineSeconds\":600,\"replicas\":3,\"revisionHistoryLimit\":2,\"selector\":{\"matchLabels\":{\"webconsole\":\"true\"}},\"strategy\":{\"type\":\"Recreate\"},\"template\":{\"metadata\":{\"annotations\":{\"installer-triggered-rollout\":\"2018-02-14T21:18:53.300023Z\"},\"creationTimestamp\":null,\"labels\":{\"webconsole\":\"true\"},\"name\":\"webconsole\"},\"spec\":{\"containers\":[{\"command\":[\"/usr/bin/origin-web-console\",\"--audit-log-path=-\",\"-v=0\",\"--config=/var/webconsole-config/webconsole-config.yaml\"],\"image\":\"registry.reg-aws.openshift.com:443/openshift3/ose-web-console:v3.9.0-0.42.0\",\"imagePullPolicy\":\"IfNotPresent\",\"livenessProbe\":{\"exec\":{\"command\":[\"/bin/sh\",\"-i\",\"-c\",\"if [[ ! -f /tmp/webconsole-config.hash ]]; then \\\\\\n  md5sum /var/webconsole-config/webconsole-config.yaml \\u003e /tmp/webconsole-config.hash; \\\\\\nelif [[ $(md5sum /var/webconsole-config/webconsole-config.yaml) != $(cat /tmp/webconsole-config.hash) ]]; then \\\\\\n  exit 1; \\\\\\nfi \\u0026\\u0026 curl -k -f https://0.0.0.0:8443/console/\"]},\"failureThreshold\":3,\"periodSeconds\":10,\"successThreshold\":1,\"timeoutSeconds\":1},\"name\":\"webconsole\",\"ports\":[{\"containerPort\":8443,\"protocol\":\"TCP\"}],\"readinessProbe\":{\"failureThreshold\":3,\"httpGet\":{\"path\":\"/healthz\",\"port\":8443,\"scheme\":\"HTTPS\"},\"periodSeconds\":10,\"successThreshold\":1,\"timeoutSeconds\":1},\"resources\":{\"requests\":{\"cpu\":\"100m\",\"memory\":\"100Mi\"}},\"terminationMessagePath\":\"/dev/termination-log\",\"terminationMessagePolicy\":\"File\",\"volumeMounts\":[{\"mountPath\":\"/var/serving-cert\",\"name\":\"serving-cert\"},{\"mountPath\":\"/var/webconsole-config\",\"name\":\"webconsole-config\"}]}],\"dnsPolicy\":\"ClusterFirst\",\"nodeSelector\":{\"node-role.kubernetes.io/master\":\"true\"},\"restartPolicy\":\"Always\",\"schedulerName\":\"default-scheduler\",\"securityContext\":{},\"serviceAccount\":\"webconsole\",\"serviceAccountName\":\"webconsole\",\"terminationGracePeriodSeconds\":30,\"volumes\":[{\"name\":\"serving-cert\",\"secret\":{\"defaultMode\":400,\"secretName\":\"webconsole-serving-cert\"}},{\"configMap\":{\"defaultMode\":440,\"name\":\"webconsole-config\"},\"name\":\"webconsole-config\"}]}}},\"status\":{\"availableReplicas\":3,\"conditions\":[{\"lastTransitionTime\":\"2018-02-13T19:04:50Z\",\"lastUpdateTime\":\"2018-02-14T14:48:12Z\",\"message\":\"ReplicaSet \\\"webconsole-b754c5977\\\" has successfully progressed.\",\"reason\":\"NewReplicaSetAvailable\",\"status\":\"True\",\"type\":\"Progressing\"},{\"lastTransitionTime\":\"2018-02-14T18:51:09Z\",\"lastUpdateTime\":\"2018-02-14T18:51:09Z\",\"message\":\"Deployment has minimum availability.\",\"reason\":\"MinimumReplicasAvailable\",\"status\":\"True\",\"type\":\"Available\"}],\"observedGeneration\":2,\"readyReplicas\":3,\"replicas\":3,\"updatedReplicas\":3}}\n"
+            "deployment.kubernetes.io/revision": "IGNORED",
+            "kubectl.kubernetes.io/last-applied-configuration": "IGNORED"
         },
         "creationTimestamp": "2018-02-13T19:04:50Z",
         "generation": 3,
@@ -33,7 +33,7 @@
         "template": {
             "metadata": {
                 "annotations": {
-                    "installer-triggered-rollout": "2018-02-14T21:18:53.300023Z"
+                    "installer-triggered-rollout": "IGNORED"
                 },
                 "creationTimestamp": null,
                 "labels": {
@@ -50,7 +50,7 @@
                             "-v=0",
                             "--config=/var/webconsole-config/webconsole-config.yaml"
                         ],
-                        "image": "registry.reg-aws.openshift.com:443/openshift3/ose-web-console:v3.9.0-0.42.0",
+                        "image": "registry.reg-aws.openshift.com:443/openshift3/ose-web-console:v3.9.14",
                         "imagePullPolicy": "IfNotPresent",
                         "livenessProbe": {
                             "exec": {

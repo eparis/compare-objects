@@ -12,7 +12,8 @@ resource=""
 namespace=""
 name=""
 ignoreEnvVars = []
-ignoreAnnotations = ["deployment.kubernetes.io/revision", "kubectl.kubernetes.io/last-applied-configuration"]
+ignoreAnnotations = []
+ignoreTemplateAnnotations = []
 
 def getContexts(clusterCSV):
     clusters = clusterCSV.split(",")
@@ -68,7 +69,14 @@ def getDefaultsFromTemplate(dc):
             if value == "IGNORED":
                 ignoreAnnotations.append(key)
 
-def cleanENV(dc, ignoreEnvVars):
+    global ignoreTemplateAnnotations
+    if "template" in dc["spec"] and "metadata" in dc["spec"]["template"] and "annotations" in dc["spec"]["template"]["metadata"]:
+        annotations = dc["spec"]["template"]["metadata"]["annotations"]
+        for key,value in annotations.items():
+            if value == "IGNORED":
+                ignoreTemplateAnnotations.append(key)
+
+def cleanENV(dc):
     for c in dc["spec"]["template"]["spec"]["containers"]:
         if "env" not in c:
             continue
@@ -97,14 +105,33 @@ def cleanMeta(dc):
         for ignore in ignoreAnnotations:
             annotations.pop(ignore, None)
 
+def cleanTemplateMeta(dc):
+    if "template" in dc["spec"] and "metadata" in dc["spec"]["template"]:
+        meta = dc["spec"]["template"]["metadata"]
+        if "annotations" in dc["spec"]["template"]["metadata"]:
+            annotations = dc["spec"]["template"]["metadata"]["annotations"]
+            for ignore in ignoreTemplateAnnotations:
+                annotations.pop(ignore, None)
+
+def cleanSpec(dc):
+    spec = dc["spec"]
+    for key in [ 'templateGeneration' ]:
+        spec.pop(key, None)
+
 def cleanStatus(dc):
     dc.pop('status', None)
+
+def cleanFields(template):
+    cleanSpec(template)
+    cleanStatus(template)
+    cleanENV(template)
+    cleanMeta(template)
+    cleanTemplateMeta(template)
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("templateFile", help="File To Use As A Template")
     parser.add_argument("--clusters", help="strings to look for in cluster names (CSV)", default="starter,free")
-    parser.add_argument("--ignore-annotations", help="annotations to ignore (CSV)", default="deployment.kubernetes.io/revision,kubectl.kubernetes.io/last-applied-configuration")
     args = parser.parse_args()
 
     with open(args.templateFile) as json_data:
@@ -112,9 +139,7 @@ def main():
         json_data.close()
 
     getDefaultsFromTemplate(template)
-    cleanENV(template, ignoreEnvVars)
-    cleanMeta(template)
-    cleanStatus(template)
+    cleanFields(template)
 
     contexts = getContexts(args.clusters)
     for context in contexts:
@@ -128,9 +153,7 @@ def main():
             print(completed.stderr.decode('utf-8'))
             continue
         dc = json.loads(completed.stdout.decode('utf-8'))
-        cleanMeta(dc)
-        cleanENV(dc, ignoreEnvVars)
-        cleanStatus(dc)
+        cleanFields(dc)
         print("Results for: ", context)
         pprint(jsondiff.diff(template, dc, syntax='symmetric'))
         print("************************************************************")

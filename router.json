@@ -101,7 +101,7 @@
                                 "value": "120s"
                             }
                         ],
-                        "image": "registry.reg-aws.openshift.com:443/openshift3/ose-haproxy-router:v3.9.0-0.42.0",
+                        "image": "registry.reg-aws.openshift.com:443/openshift3/ose-haproxy-router:v3.9.14",
                         "imagePullPolicy": "IfNotPresent",
                         "livenessProbe": {
                             "failureThreshold": 3,

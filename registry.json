@@ -2,16 +2,16 @@
     "apiVersion": "apps.openshift.io/v1",
     "kind": "DeploymentConfig",
     "metadata": {
-        "creationTimestamp": "2017-04-28T14:49:33Z",
-        "generation": 19,
+        "creationTimestamp": "2017-04-07T20:17:32Z",
+        "generation": 24,
         "labels": {
             "docker-registry": "default"
         },
         "name": "docker-registry",
         "namespace": "default",
-        "resourceVersion": "2027568655",
+        "resourceVersion": "1066935286",
         "selfLink": "/apis/apps.openshift.io/v1/namespaces/default/deploymentconfigs/docker-registry",
-        "uid": "e45af973-2c21-11e7-a84f-0ab8769191d3"
+        "uid": "3b2157a3-1bcf-11e7-8f92-02d7377a4b17"
     },
     "spec": {
         "replicas": 3,
@@ -78,7 +78,7 @@
                                 "value": "2h"
                             }
                         ],
-                        "image": "registry.reg-aws.openshift.com:443/openshift3/ose-docker-registry:v3.7.23",
+                        "image": "registry.reg-aws.openshift.com:443/openshift3/ose-docker-registry:v3.9.14",
                         "imagePullPolicy": "IfNotPresent",
                         "livenessProbe": {
                             "failureThreshold": 3,
@@ -180,16 +180,16 @@
         "availableReplicas": 3,
         "conditions": [
             {
-                "lastTransitionTime": "2018-01-18T15:39:52Z",
-                "lastUpdateTime": "2018-01-18T15:39:54Z",
-                "message": "replication controller \"docker-registry-8\" successfully rolled out",
+                "lastTransitionTime": "2018-04-09T18:06:03Z",
+                "lastUpdateTime": "2018-04-09T18:06:05Z",
+                "message": "replication controller \"docker-registry-14\" successfully rolled out",
                 "reason": "NewReplicationControllerAvailable",
                 "status": "True",
                 "type": "Progressing"
             },
             {
-                "lastTransitionTime": "2018-02-13T18:19:13Z",
-                "lastUpdateTime": "2018-02-13T18:19:13Z",
+                "lastTransitionTime": "2018-04-09T21:58:04Z",
+                "lastUpdateTime": "2018-04-09T21:58:04Z",
                 "message": "Deployment config has minimum availability.",
                 "status": "True",
                 "type": "Available"
@@ -203,12 +203,11 @@
             ],
             "message": "config change"
         },
-        "latestVersion": 8,
-        "observedGeneration": 19,
+        "latestVersion": 14,
+        "observedGeneration": 24,
         "readyReplicas": 3,
         "replicas": 3,
         "unavailableReplicas": 0,
         "updatedReplicas": 3
     }
 }
-
