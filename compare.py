@@ -50,17 +50,20 @@ def getDefaultsFromTemplate(dc):
     global namespace
     global name
     resource = dc["kind"]
-    namespace = dc["metadata"]["namespace"]
+    namespace = "default"
+    if "namespace" in dc["metadata"]:
+        namespace = dc["metadata"]["namespace"]
     name = dc["metadata"]["name"]
 
     global ignoreEnvVars
-    for containers in dc["spec"]["template"]["spec"]["containers"]:
-        if "env" not in containers:
-            continue
-        env = containers["env"]
-        for val in env:
-            if "value" in val and val["value"] == "IGNORED":
-                ignoreEnvVars.append(val["name"])
+    if "spec" in dc and "template" in dc["spec"] and "spec" in dc["spec"]["template"] and "containers" in dc["spec"]["template"]["spec"]:
+        for containers in dc["spec"]["template"]["spec"]["containers"]:
+            if "env" not in containers:
+                continue
+            env = containers["env"]
+            for val in env:
+                if "value" in val and val["value"] == "IGNORED":
+                    ignoreEnvVars.append(val["name"])
 
     global ignoreAnnotations
     if "annotations" in dc["metadata"]:
@@ -70,13 +73,15 @@ def getDefaultsFromTemplate(dc):
                 ignoreAnnotations.append(key)
 
     global ignoreTemplateAnnotations
-    if "template" in dc["spec"] and "metadata" in dc["spec"]["template"] and "annotations" in dc["spec"]["template"]["metadata"]:
+    if "spec" in dc and "template" in dc["spec"] and "metadata" in dc["spec"]["template"] and "annotations" in dc["spec"]["template"]["metadata"]:
         annotations = dc["spec"]["template"]["metadata"]["annotations"]
         for key,value in annotations.items():
             if value == "IGNORED":
                 ignoreTemplateAnnotations.append(key)
 
 def cleanENV(dc):
+    if "spec" not in dc or "template" not in dc["spec"] or "spec" not in dc["spec"]["template"] or "containers" not in dc["spec"]["template"]["spec"]:
+        return
     for c in dc["spec"]["template"]["spec"]["containers"]:
         if "env" not in c:
             continue
@@ -106,17 +111,19 @@ def cleanMeta(dc):
             annotations.pop(ignore, None)
 
 def cleanTemplateMeta(dc):
-    if "template" in dc["spec"] and "metadata" in dc["spec"]["template"]:
-        meta = dc["spec"]["template"]["metadata"]
-        if "annotations" in dc["spec"]["template"]["metadata"]:
-            annotations = dc["spec"]["template"]["metadata"]["annotations"]
-            for ignore in ignoreTemplateAnnotations:
-                annotations.pop(ignore, None)
+    if "spec" not in dc or "template" not in dc["spec"] or "metadata" not in dc["spec"]["template"]:
+        return
+    meta = dc["spec"]["template"]["metadata"]
+    if "annotations" in dc["spec"]["template"]["metadata"]:
+        annotations = dc["spec"]["template"]["metadata"]["annotations"]
+        for ignore in ignoreTemplateAnnotations:
+            annotations.pop(ignore, None)
 
 def cleanSpec(dc):
-    spec = dc["spec"]
-    for key in [ 'templateGeneration' ]:
-        spec.pop(key, None)
+    if "sepc" in dc:
+        spec = dc["spec"]
+        for key in [ 'templateGeneration' ]:
+            spec.pop(key, None)
 
 def cleanStatus(dc):
     dc.pop('status', None)
